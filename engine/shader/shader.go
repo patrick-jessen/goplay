@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
-	mgl "github.com/go-gl/mathgl/mgl64"
+	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
 const shaderDir = "./assets/shaders/"
@@ -140,7 +140,7 @@ func initializeUniformBuffer() {
 		return
 	}
 
-	proj := mgl.Perspective(mgl.DegToRad(45.0), float64(800)/float64(600), 0.1, 100.0)
+	proj := mgl.Perspective(mgl.DegToRad(45.0), float32(800)/float32(600), 0.1, 100.0)
 	view := mgl.Translate3D(0, 0, -10)
 	model := mgl.Ident4()
 

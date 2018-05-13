@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	mgl "github.com/go-gl/mathgl/mgl64"
+	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
 // Node is a node in the 3D scene graph.
@@ -70,6 +70,10 @@ func (n *Node) Child(name string) *Node {
 // Returns nil if component does not exist.
 func (n *Node) Component(name string) Component {
 	return n.components[name]
+}
+
+func (n *Node) WorldTransform() mgl.Mat4 {
+	return n.worldTransform
 }
 
 // update is called once every game loop.

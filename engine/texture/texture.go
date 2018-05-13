@@ -18,8 +18,8 @@ const (
 
 var cache = make(map[string]Texture)
 
-// Get returns a texture by either loading it or reading from cache.
-func Get(name string) Texture {
+// Load returns a texture by either loading it or reading from cache.
+func Load(name string) Texture {
 	// Read form cache
 	if val, ok := cache[name]; ok {
 		return val

@@ -3,7 +3,7 @@ package scene
 import (
 	"encoding/json"
 
-	mgl "github.com/go-gl/mathgl/mgl64"
+	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
 // Transform represents a transformation matrix.
@@ -75,7 +75,7 @@ func (t *Transform) UnmarshalJSON(data []byte) error {
 		json.Unmarshal(*pos, &t.position)
 	}
 	if rot, ok := objMap["rotation"]; ok {
-		var tmp [4]float64
+		var tmp [4]float32
 		json.Unmarshal(*rot, &tmp)
 		t.rotation = mgl.Quat{
 			W: tmp[0],
@@ -98,11 +98,11 @@ func (t *Transform) UnmarshalJSON(data []byte) error {
 func (t *Transform) MarshalJSON() ([]byte, error) {
 	tmp := struct {
 		P mgl.Vec3   `json:"position"`
-		R [4]float64 `json:"rotation"`
+		R [4]float32 `json:"rotation"`
 		S mgl.Vec3   `json:"scale"`
 	}{
 		P: t.position,
-		R: [4]float64{
+		R: [4]float32{
 			t.rotation.W,
 			t.rotation.V[0],
 			t.rotation.V[1],
