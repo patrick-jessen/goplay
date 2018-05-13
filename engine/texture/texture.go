@@ -43,7 +43,9 @@ func (t Texture) Bind(idx uint32) {
 // loadTexture loads a texture from a file.
 func loadTexture(name string) uint32 {
 	file := textureDir + name
-	if _, err := os.Stat(file + ".png"); err == nil {
+	if _, err := os.Stat(file); err == nil {
+
+	} else if _, err := os.Stat(file + ".png"); err == nil {
 		file += ".png"
 	} else if _, err := os.Stat(file + ".jpg"); err == nil {
 		file += ".jpg"

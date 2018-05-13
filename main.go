@@ -9,7 +9,6 @@ import (
 	"github.com/patrick-jessen/goplay/engine/model"
 	"github.com/patrick-jessen/goplay/engine/scene"
 	"github.com/patrick-jessen/goplay/engine/shader"
-	"github.com/patrick-jessen/goplay/engine/texture"
 	"github.com/patrick-jessen/goplay/engine/window"
 )
 
@@ -19,8 +18,8 @@ type app struct {
 }
 
 func (a *app) OnStart() {
-	shader.Load("basic")
-	texture.Load("default").Bind(0)
+	// shader.Load("basic")
+	// texture.Load("default").Bind(0)
 
 	a.scene = scene.New()
 	child0 := a.scene.Root.NewChild("cubeNode")
@@ -32,14 +31,15 @@ func (a *app) OnStart() {
 		ProjectionMatrix: mgl.Perspective(mgl.DegToRad(45.0), float32(800)/float32(600), 0.1, 100.0),
 	}
 
-	child1.SetPosition(mgl.Vec3{1, 1, 0})
+	child1.SetScale(mgl.Vec3{0.01, 0.01, 0.01})
+	child1.SetPosition(mgl.Vec3{0, 1, 0})
 	child2.AddComponent(a.camera)
 	child2.AddComponent(&components.ArcBall{
 		Dist: 10,
 	})
 
 	model.Load("cube").Mount(child0)
-	model.Load("cube").Mount(child1)
+	model.Load("duck").Mount(child1)
 
 }
 func (a *app) OnUpdate() {
