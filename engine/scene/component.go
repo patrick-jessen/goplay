@@ -1,4 +1,4 @@
-package node
+package scene
 
 import "reflect"
 
@@ -12,6 +12,6 @@ func RegisterComponent(c Component) {
 
 // Component is a behavior which can be attached to nodes.
 type Component interface {
-	initialize(*Node)
-	update()
+	Initialize(*Node)
+	Update()
 }

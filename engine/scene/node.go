@@ -1,4 +1,4 @@
-package node
+package scene
 
 import (
 	"encoding/json"
@@ -25,6 +25,7 @@ func newNode() *Node {
 		children:       make(map[string]*Node),
 		components:     make(map[string]Component),
 		worldTransform: mgl.Ident4(),
+		name:           "root",
 	}
 }
 
@@ -55,8 +56,20 @@ func (n *Node) AddComponent(c Component) {
 		panic("component already exists: " + compName)
 	}
 
-	c.initialize(n)
+	c.Initialize(n)
 	n.components[compName] = c
+}
+
+// Child returns the child with the given name.
+// Returns nil if child does not exist.
+func (n *Node) Child(name string) *Node {
+	return n.children[name]
+}
+
+// Component returns the component with the given type.
+// Returns nil if component does not exist.
+func (n *Node) Component(name string) Component {
+	return n.components[name]
 }
 
 // update is called once every game loop.
@@ -66,7 +79,7 @@ func (n *Node) update() {
 	}
 
 	for _, c := range n.components {
-		c.update()
+		c.Update()
 	}
 	for _, c := range n.children {
 		c.update()
@@ -122,4 +135,25 @@ func (n *Node) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
+}
+
+// MarshalJSON encodes a node as JSON.
+func (n *Node) MarshalJSON() ([]byte, error) {
+	tmp := struct {
+		Transform  Transform            `json:"transform"`
+		Children   map[string]*Node     `json:"children"`
+		Components map[string]Component `json:"components"`
+	}{
+		Transform:  n.Transform,
+		Children:   n.children,
+		Components: n.components,
+	}
+
+	return json.Marshal(&tmp)
+}
+
+// String returns a JSON encoded string.
+func (n Node) String() string {
+	b, _ := json.Marshal(&n)
+	return string(b)
 }

@@ -1,4 +1,4 @@
-package node
+package scene
 
 import (
 	"encoding/json"
@@ -18,15 +18,15 @@ type testComponent struct {
 	Value            int `json:"value"`
 }
 
-func (t *testComponent) initialize(n *Node) {
+func (t *testComponent) Initialize(n *Node) {
 	t.initializeCalled++
 	t.node = n
 }
-func (t *testComponent) update() {
+func (t *testComponent) Update() {
 	t.updateCalled++
 }
 
-func TestNewNode(t *testing.T) {
+func Test_newNode(t *testing.T) {
 	n := newNode()
 	if n.mat != mgl.Ident4() {
 		t.Errorf("wrong transformation:\n got %v\nexpected %v", n.mat, mgl.Ident4())
@@ -40,9 +40,26 @@ func TestNewNode(t *testing.T) {
 	if n.components == nil {
 		t.Error("components is nil-map")
 	}
+	if n.name != "root" {
+		t.Error("root name not set")
+	}
 }
 
-func TestNodeNewChild(t *testing.T) {
+func TestNode_initialize(t *testing.T) {
+	parent := newNode()
+	child := newNode()
+
+	child.initialize(parent, "child")
+
+	if child.parent != parent {
+		t.Errorf("incorrect parent. got %v, expected %v", child.parent, parent)
+	}
+	if child.name != "child" {
+		t.Errorf("incorrect name. got %v, expected %v", child.name, "child")
+	}
+}
+
+func TestNode_NewChild(t *testing.T) {
 	parent := newNode()
 	returned := parent.NewChild("test")
 
@@ -67,7 +84,7 @@ func TestNodeNewChild(t *testing.T) {
 	t.Error("child with same name can be added multiple times")
 }
 
-func TestNodeAddComponent(t *testing.T) {
+func TestNode_AddComponent(t *testing.T) {
 	node := newNode()
 
 	node.AddComponent(&testComponent{})
@@ -95,7 +112,27 @@ func TestNodeAddComponent(t *testing.T) {
 	t.Error("component with same type can be added multiple times")
 }
 
-func TestNodeUpdate(t *testing.T) {
+func TestNode_Child(t *testing.T) {
+	n := newNode()
+	c := n.NewChild("child")
+
+	if n.Child("child") != c {
+		t.Errorf("not the right child. got %v, expected %v", n.Child("child"), c)
+	}
+}
+
+func TestNode_Component(t *testing.T) {
+	n := newNode()
+	n.AddComponent(&testComponent{})
+
+	comp := n.Component("testComponent")
+	_, ok := comp.(*testComponent)
+	if !ok {
+		t.Errorf("not the right component. got %v", comp)
+	}
+}
+
+func TestNode_update(t *testing.T) {
 	parent := newNode()
 	child := parent.NewChild("child")
 	child.SetPosition(mgl.Vec3{1, 2, 3})
@@ -118,7 +155,7 @@ func TestNodeUpdate(t *testing.T) {
 	}
 }
 
-func TestNodeJSONUnmarshal(t *testing.T) {
+func TestNode_UnmarshalJSON(t *testing.T) {
 	jsonSrc := `{
 		"transform": {
 			"position":	[1,2,3],
@@ -167,5 +204,50 @@ func TestNodeJSONUnmarshal(t *testing.T) {
 	}
 	if child.Transform.position != (mgl.Vec3{11, 12, 13}) {
 		t.Error("child is not unmarshalled")
+	}
+
+	// Test for non-existing component
+	jsonSrc = `{
+		"components": {
+			"doesNotExist": {
+				"value": 42
+			}
+		}
+	}`
+	n = newNode()
+	defer func() {
+		recover()
+	}()
+
+	e = json.Unmarshal([]byte(jsonSrc), n)
+	if e != nil {
+		t.Fatal(e)
+	}
+	t.Error("non-existing component types allowed")
+}
+
+func TestNode_MarshalJSON(t *testing.T) {
+	expected := `{"transform":{"position":[0,0,0],"rotation":[1,0,0,0],"scale":[1,1,1]},"children":{"child":{"transform":{"position":[0,0,0],"rotation":[1,0,0,0],"scale":[1,1,1]},"children":{},"components":{"testComponent":{"value":1234}}}},"components":{}}`
+
+	n := newNode()
+	n.NewChild("child").AddComponent(&testComponent{Value: 1234})
+
+	b, e := json.Marshal(n)
+	if e != nil {
+		t.Fatal("failed to marshal node")
+	}
+	if string(b) != expected {
+		t.Errorf("did not marshal correctly.\n got %v\n expected %v", string(b), expected)
+	}
+}
+
+func TestNode_String(t *testing.T) {
+	expected := `{"transform":{"position":[0,0,0],"rotation":[1,0,0,0],"scale":[1,1,1]},"children":{"child":{"transform":{"position":[0,0,0],"rotation":[1,0,0,0],"scale":[1,1,1]},"children":{},"components":{"testComponent":{"value":1234}}}},"components":{}}`
+
+	n := newNode()
+	n.NewChild("child").AddComponent(&testComponent{Value: 1234})
+
+	if n.String() != expected {
+		t.Errorf("did not marshal correctly.\n got %v\n expected %v", n.String(), expected)
 	}
 }
