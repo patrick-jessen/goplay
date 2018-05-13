@@ -47,11 +47,17 @@ type Model struct {
 func (m Model) Mount(sn *scene.Node) {
 	g := m.file.GlTF
 	scene := g.Scenes[g.Scene]
+
+	pos := sn.Position()
+	rot := sn.Rotation()
+	scal := sn.Scale()
+
 	m.mountChild(sn, &gltf.Node{
-		Translation: []float32{0, 0, 0},
-		Rotation:    []float32{1, 0, 0, 0},
-		Scale:       []float32{1, 1, 1},
+		Translation: []float32{pos.X(), pos.Y(), pos.Z()},
+		Rotation:    []float32{rot.W, rot.V.X(), rot.V.Y(), rot.V.Z()},
+		Scale:       []float32{scal.X(), scal.Y(), scal.Z()},
 		Children:    scene.Nodes,
+		Mesh:        -1,
 	})
 }
 

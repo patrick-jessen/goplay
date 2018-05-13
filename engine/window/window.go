@@ -186,5 +186,5 @@ func cursorPosCallback(w *glfw.Window, xpos float64, ypos float64) {
 
 // scrollCallback is called when the mouse wheel is scrolled.
 func scrollCallback(w *glfw.Window, xoff float64, yoff float64) {
-	onInput(&MouseScrollInput{float64(yoff)})
+	onInput(&MouseScrollInput{float32(yoff)})
 }

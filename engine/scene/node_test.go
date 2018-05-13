@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	mgl "github.com/go-gl/mathgl/mgl64"
+	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
 func init() {
@@ -144,13 +144,13 @@ func TestNode_update(t *testing.T) {
 
 	parent.update()
 
-	if parent.worldTransform != mgl.Ident4() {
+	if parent.WorldTransform() != mgl.Ident4() {
 		t.Errorf("root has wrong world transform.\ngot %v\nexpected %v",
-			parent.worldTransform, mgl.Ident4())
+			parent.WorldTransform(), mgl.Ident4())
 	}
-	if child.worldTransform != mgl.Translate3D(1, 2, 3) {
+	if child.WorldTransform() != mgl.Translate3D(1, 2, 3) {
 		t.Errorf("child has wrong world transform.\ngot %v\nexpected %v",
-			child.worldTransform, mgl.Translate3D(1, 2, 3))
+			child.WorldTransform(), mgl.Translate3D(1, 2, 3))
 	}
 	comp := child.components["testComponent"].(*testComponent)
 	if comp.updateCalled != 1 {

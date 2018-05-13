@@ -1,6 +1,6 @@
 package window
 
-import mgl "github.com/go-gl/mathgl/mgl64"
+import mgl "github.com/go-gl/mathgl/mgl32"
 
 // MouseMoveInput is an event for when the mouse is moved.
 type MouseMoveInput struct {
@@ -9,7 +9,7 @@ type MouseMoveInput struct {
 
 // MouseScrollInput is an event for when the mouse wheel is scrolled.
 type MouseScrollInput struct {
-	Delta float64
+	Delta float32
 }
 
 // MouseButtonInput is an event for when a mouse button is pressed.
@@ -29,7 +29,7 @@ type KeyboardInput struct {
 var (
 	lastMousePosition  mgl.Vec2
 	mousePosition      mgl.Vec2
-	mouseScroll        float64
+	mouseScroll        float32
 	mouseButtonPressed [3]bool
 	mouseButtonEvent   [3]int
 )
@@ -45,7 +45,7 @@ func MouseMove() mgl.Vec2 {
 }
 
 // MouseScroll returns the delta that the mouse wheel scrolled since last frame.
-func MouseScroll() float64 {
+func MouseScroll() float32 {
 	return mouseScroll
 }
 
@@ -76,7 +76,7 @@ func onInput(e interface{}) {
 	switch e.(type) {
 	case *MouseMoveInput:
 		tmp := e.(*MouseMoveInput)
-		mousePosition = mgl.Vec2{float64(tmp.X), float64(tmp.Y)}
+		mousePosition = mgl.Vec2{float32(tmp.X), float32(tmp.Y)}
 
 	case *MouseScrollInput:
 		tmp := e.(*MouseScrollInput)

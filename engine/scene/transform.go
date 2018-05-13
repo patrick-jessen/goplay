@@ -38,6 +38,11 @@ func (t *Transform) Scale() mgl.Vec3 {
 	return t.scale
 }
 
+// Matrix returns the location transformation matrix.
+func (t *Transform) Matrix() mgl.Mat4 {
+	return t.mat
+}
+
 // SetPosition sets the position.
 func (t *Transform) SetPosition(v mgl.Vec3) {
 	t.position = v
@@ -54,6 +59,25 @@ func (t *Transform) SetRotation(q mgl.Quat) {
 func (t *Transform) SetScale(v mgl.Vec3) {
 	t.scale = v
 	t.update()
+}
+
+func (t *Transform) SetMatrix(m mgl.Mat4) {
+	t.mat = m
+
+	// Decompose position
+	t.position = mgl.Vec3{m.At(0, 3), m.At(1, 3), m.At(2, 3)}
+
+	// Decompose scale
+	scaleX, scaleY, scaleZ := mgl.Extract3DScale(m)
+	t.scale = mgl.Vec3{scaleX, scaleY, scaleZ}
+
+	// Decompose rotation
+	if scaleX == 0 || scaleY == 0 || scaleZ == 0 {
+		t.rotation = mgl.QuatIdent()
+		return
+	}
+
+	t.rotation = mgl.Mat4ToQuat(m.Mat3().Mat4().Mul4(mgl.Scale3D(1/scaleX, 1/scaleY, 1/scaleZ)))
 }
 
 // update updates the transformation matrix.

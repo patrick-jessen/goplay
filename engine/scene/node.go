@@ -72,8 +72,14 @@ func (n *Node) Component(name string) Component {
 	return n.components[name]
 }
 
+// WorldTransform return the node's global transformation.
 func (n *Node) WorldTransform() mgl.Mat4 {
 	return n.worldTransform
+}
+
+// Parent returns the node's parent.
+func (n *Node) Parent() *Node {
+	return n.parent
 }
 
 // update is called once every game loop.
