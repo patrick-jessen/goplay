@@ -13,6 +13,7 @@ func init() {
 
 type testComponent struct {
 	initializeCalled int
+	renderCalled     int
 	updateCalled     int
 	node             *Node
 	Value            int `json:"value"`
@@ -24,6 +25,9 @@ func (t *testComponent) Initialize(n *Node) {
 }
 func (t *testComponent) Update() {
 	t.updateCalled++
+}
+func (t *testComponent) Render() {
+	t.renderCalled++
 }
 
 func Test_newNode(t *testing.T) {
@@ -152,6 +156,17 @@ func TestNode_update(t *testing.T) {
 	if comp.updateCalled != 1 {
 		t.Errorf("update() was not called the right number of times. got %v expected %v",
 			comp.updateCalled, 1)
+	}
+}
+
+func TestNode_render(t *testing.T) {
+	n := newNode()
+	c := testComponent{}
+	n.AddComponent(&c)
+
+	n.render()
+	if c.renderCalled != 1 {
+		t.Errorf("render() was not called the right number of times. got %v expected %v", c.renderCalled, 1)
 	}
 }
 

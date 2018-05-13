@@ -13,3 +13,7 @@ func New() Scene {
 func (s Scene) Update() {
 	s.Root.update()
 }
+
+func (s Scene) Render() {
+	s.Root.render()
+}

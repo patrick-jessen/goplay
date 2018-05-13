@@ -86,6 +86,15 @@ func (n *Node) update() {
 	}
 }
 
+func (n *Node) render() {
+	for _, c := range n.components {
+		c.Render()
+	}
+	for _, c := range n.children {
+		c.render()
+	}
+}
+
 // UnmarshalJSON decodes a node from JSON.
 func (n *Node) UnmarshalJSON(data []byte) error {
 	var objMap map[string]*json.RawMessage

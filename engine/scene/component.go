@@ -14,4 +14,5 @@ func RegisterComponent(c Component) {
 type Component interface {
 	Initialize(*Node)
 	Update()
+	Render()
 }
