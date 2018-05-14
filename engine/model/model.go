@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/patrick-jessen/goplay/engine/texture"
-
 	mgl "github.com/go-gl/mathgl/mgl32"
 
 	"github.com/patrick-jessen/goplay/engine/material"
@@ -13,6 +11,7 @@ import (
 	"github.com/patrick-jessen/goplay/engine/model/gltf"
 	"github.com/patrick-jessen/goplay/engine/scene"
 	"github.com/patrick-jessen/goplay/engine/shader"
+	"github.com/patrick-jessen/goplay/engine/texture"
 )
 
 const modelDir = "./assets/models/"
@@ -83,14 +82,16 @@ func (m Model) mountChild(sn *scene.Node, gn *gltf.Node) {
 			mr.geoms = append(mr.geoms, geom)
 
 			// Set material
-			gmat := g.Materials[p.Material]
-			mat := material.New()
-			if gmat.PbrMetallicRoughness.BaseColorTexture.Index >= 0 {
-				t := g.Textures[gmat.PbrMetallicRoughness.BaseColorTexture.Index]
-				tsrc := g.Images[t.Source]
-				mat.Textures[0] = texture.Load(tsrc.URI)
+			if mr.Mat == nil {
+				gmat := g.Materials[p.Material]
+				mat := material.New()
+				if gmat.PbrMetallicRoughness.BaseColorTexture.Index >= 0 {
+					t := g.Textures[gmat.PbrMetallicRoughness.BaseColorTexture.Index]
+					tsrc := g.Images[t.Source]
+					mat.Textures[0] = texture.Load(tsrc.URI)
+				}
+				mr.Mat = &mat
 			}
-			mr.mats = append(mr.mats, mat)
 		}
 
 		sn.AddComponent(mr)
@@ -112,7 +113,7 @@ func (m Model) mountChild(sn *scene.Node, gn *gltf.Node) {
 type MeshRenderer struct {
 	node  *scene.Node
 	geoms []*geometry.Geometry
-	mats  []material.Material
+	Mat   *material.Material
 }
 
 func (mr *MeshRenderer) Initialize(n *scene.Node) {
@@ -122,9 +123,9 @@ func (mr *MeshRenderer) Update() {
 }
 func (mr *MeshRenderer) Render() {
 	shader.SetModelMatrix(mr.node.WorldTransform())
+	mr.Mat.Apply()
 
-	for i, g := range mr.geoms {
-		mr.mats[i].Apply()
+	for _, g := range mr.geoms {
 		g.Draw()
 	}
 }

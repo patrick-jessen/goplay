@@ -55,7 +55,7 @@ func TestNode_initialize(t *testing.T) {
 
 	child.initialize(parent, "child")
 
-	if child.parent != parent {
+	if child.Parent() != parent {
 		t.Errorf("incorrect parent. got %v, expected %v", child.parent, parent)
 	}
 	if child.name != "child" {

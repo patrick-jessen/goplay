@@ -15,10 +15,12 @@ var windowSettings = struct {
 	width, height int
 	fullscreen    bool
 	title         string
+	vsync         bool
 }{
 	width:  800,
 	height: 600,
 	title:  "GoPlay",
+	vsync:  false,
 }
 
 var winHandle *glfw.Window
@@ -69,9 +71,11 @@ func Create() {
 		panic("failed to initialize OpenGL:/n" + err.Error())
 	}
 
+	SetVerticalSync(windowSettings.vsync)
+
 	gl.Viewport(0, 0, int32(windowSettings.width), int32(windowSettings.height))
 	gl.Enable(gl.CULL_FACE)
-	// gl.Enable(gl.FRAMEBUFFER_SRGB)
+	gl.Enable(gl.FRAMEBUFFER_SRGB)
 	gl.Enable(gl.DEPTH_TEST)
 }
 
@@ -125,11 +129,14 @@ func SetVideoMode(fs bool, w, h int) {
 
 // SetVerticalSync enables or disables vertical synchronization.
 func SetVerticalSync(on bool) {
-	interval := 0
-	if on {
-		interval = 1
+	windowSettings.vsync = on
+	if winHandle != nil {
+		interval := 0
+		if on {
+			interval = 1
+		}
+		glfw.SwapInterval(interval)
 	}
-	glfw.SwapInterval(interval)
 }
 
 // ShouldClose indicates whether the window should close.

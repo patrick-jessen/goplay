@@ -5,6 +5,11 @@ import (
 	"github.com/patrick-jessen/goplay/engine/scene"
 )
 
+func init() {
+	scene.RegisterComponent(&Camera{})
+	scene.RegisterComponent(&ArcBall{})
+}
+
 type Camera struct {
 	ProjectionMatrix mgl.Mat4
 	node             *scene.Node

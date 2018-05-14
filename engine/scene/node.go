@@ -7,6 +7,8 @@ import (
 	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
+var MountMap = make(map[*Node]string)
+
 // Node is a node in the 3D scene graph.
 type Node struct {
 	Transform
@@ -33,6 +35,13 @@ func newNode() *Node {
 func (n *Node) initialize(parent *Node, name string) {
 	n.parent = parent
 	n.name = name
+
+	for k, v := range n.children {
+		v.initialize(n, k)
+	}
+	for _, v := range n.components {
+		v.Initialize(n)
+	}
 }
 
 // NewChild creates a new child on the current node.
@@ -124,12 +133,12 @@ func (n *Node) UnmarshalJSON(data []byte) error {
 		}
 
 		for k, v := range childMap {
-			var child Node
-			e = json.Unmarshal(*v, &child)
+			child := newNode()
+			e = json.Unmarshal(*v, child)
 			if e != nil {
 				return e
 			}
-			n.children[k] = &child
+			n.children[k] = child
 		}
 	}
 	if c, ok := objMap["components"]; ok {
@@ -151,6 +160,11 @@ func (n *Node) UnmarshalJSON(data []byte) error {
 			}
 			n.components[k] = comp.Interface().(Component)
 		}
+	}
+	if m, ok := objMap["mount"]; ok {
+		var str string
+		json.Unmarshal(*m, &str)
+		MountMap[n] = str
 	}
 
 	return nil
