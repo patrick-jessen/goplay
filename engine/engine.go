@@ -3,6 +3,7 @@
 package engine
 
 import (
+	"github.com/patrick-jessen/goplay/editor"
 	"github.com/patrick-jessen/goplay/engine/window"
 )
 
@@ -15,6 +16,7 @@ type Application interface {
 
 // Start starts the engine using the given application.
 func Start(a Application) {
+	go editor.Start()
 	defer window.Deinitialize()
 
 	window.Create()
@@ -26,5 +28,11 @@ func Start(a Application) {
 	for !window.ShouldClose() {
 		window.Update()
 		a.OnUpdate()
+
+		select {
+		case ef := <-editor.EditorChannel:
+			ef()
+		default:
+		}
 	}
 }

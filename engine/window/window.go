@@ -16,15 +16,18 @@ var windowSettings = struct {
 	fullscreen    bool
 	title         string
 	vsync         bool
+	msaa          int
 }{
-	width:  800,
-	height: 600,
-	title:  "GoPlay",
-	vsync:  false,
+	width:      800,
+	height:     600,
+	title:      "GoPlay",
+	vsync:      false,
+	msaa:       4,
+	fullscreen: false,
 }
 
 var winHandle *glfw.Window
-var resizeHandler func(int, int)
+var resizeHandlers []func(int, int)
 
 // init initializes the window system.
 func init() {
@@ -46,11 +49,12 @@ func Deinitialize() {
 func Create() {
 	var err error
 
-	mode := glfw.GetPrimaryMonitor().GetVideoMode()
-	glfw.WindowHint(glfw.RedBits, mode.RedBits)
-	glfw.WindowHint(glfw.GreenBits, mode.GreenBits)
-	glfw.WindowHint(glfw.BlueBits, mode.BlueBits)
-	glfw.WindowHint(glfw.RefreshRate, mode.RefreshRate)
+	// mode := glfw.GetPrimaryMonitor().GetVideoMode()
+	// glfw.WindowHint(glfw.RedBits, mode.RedBits)
+	// glfw.WindowHint(glfw.GreenBits, mode.GreenBits)
+	// glfw.WindowHint(glfw.BlueBits, mode.BlueBits)
+	// glfw.WindowHint(glfw.RefreshRate, mode.RefreshRate)
+	glfw.WindowHint(glfw.Samples, windowSettings.msaa)
 
 	var fsMon *glfw.Monitor
 	if windowSettings.fullscreen {
@@ -77,11 +81,12 @@ func Create() {
 	gl.Enable(gl.CULL_FACE)
 	gl.Enable(gl.FRAMEBUFFER_SRGB)
 	gl.Enable(gl.DEPTH_TEST)
+	gl.Enable(gl.MULTISAMPLE)
 }
 
-// SetResizeHandler sets the resize handler.
-func SetResizeHandler(handler func(int, int)) {
-	resizeHandler = handler
+// AddResizeHandler sets the resize handler.
+func AddResizeHandler(handler func(int, int)) {
+	resizeHandlers = append(resizeHandlers, handler)
 }
 
 // Close closes the window.
@@ -111,6 +116,7 @@ func SetVideoMode(fs bool, w, h int) {
 		}
 		if winHandle != nil {
 			winHandle.SetMonitor(glfw.GetPrimaryMonitor(), 0, 0, w, h, refresh)
+			SetVerticalSync(windowSettings.vsync)
 		}
 	} else {
 		if w == -1 || h == -1 {
@@ -119,6 +125,7 @@ func SetVideoMode(fs bool, w, h int) {
 		}
 		if winHandle != nil {
 			winHandle.SetMonitor(nil, 100, 100, w, h, refresh)
+			SetVerticalSync(windowSettings.vsync)
 		}
 	}
 
@@ -137,6 +144,16 @@ func SetVerticalSync(on bool) {
 		}
 		glfw.SwapInterval(interval)
 	}
+}
+
+// VerticalSync return whether vsync is enabled or not.
+func VerticalSync() bool {
+	return windowSettings.vsync
+}
+
+// Size returns the window size.
+func Size() [2]int {
+	return [2]int{windowSettings.width, windowSettings.height}
 }
 
 // ShouldClose indicates whether the window should close.
@@ -163,9 +180,12 @@ func Update() {
 
 // resizeCallback handles window resize.
 func resizeCallback(w *glfw.Window, width, height int) {
-	if resizeHandler != nil {
-		resizeHandler(width, height)
+	for _, r := range resizeHandlers {
+		r(width, height)
 	}
+	windowSettings.width = width
+	windowSettings.height = height
+	gl.Viewport(0, 0, int32(windowSettings.width), int32(windowSettings.height))
 }
 
 // keyCallback is called when a key is pressed.

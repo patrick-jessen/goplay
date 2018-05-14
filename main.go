@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/patrick-jessen/goplay/engine/model"
 
@@ -20,13 +18,12 @@ type app struct {
 
 func (a *app) OnStart() {
 	a.scene = scene.Load("main")
+	a.scene.MakeCurrent()
 	a.camera = a.scene.Root.Child("camera").Component("Camera").(*components.Camera)
 
 	for k, v := range scene.MountMap {
 		model.Load(v).Mount(k)
 	}
-
-	fmt.Println(a.scene.Root.Child("duck").Child("0"))
 }
 func (a *app) OnUpdate() {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

@@ -7,6 +7,12 @@ import (
 
 const sceneDir = "./assets/scenes/"
 
+var currentScene Scene
+
+func Current() Scene {
+	return currentScene
+}
+
 type Scene struct {
 	Root *Node
 }
@@ -40,4 +46,8 @@ func (s Scene) Update() {
 
 func (s Scene) Render() {
 	s.Root.render()
+}
+
+func (s Scene) MakeCurrent() {
+	currentScene = s
 }
