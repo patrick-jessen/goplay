@@ -36,8 +36,9 @@ func (a *app) OnUpdate() {
 func (a *app) OnExit() {}
 
 func main() {
-	window.SetTitle("MyGame")
+	window.Settings.SetVSync(true)
+	window.Settings.SetTitle("MyGame")
+
 	window.SetVideoMode(false, 1024, 768)
-	window.SetVSync(true)
 	engine.Start(&app{})
 }

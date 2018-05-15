@@ -66,7 +66,7 @@ func Create() {
 		panic("failed to initialize OpenGL:/n" + err.Error())
 	}
 
-	SetVSync(windowSettings.vsync)
+	Settings.Apply()
 
 	gl.Viewport(0, 0, int32(windowSettings.width), int32(windowSettings.height))
 	gl.Enable(gl.CULL_FACE)
@@ -84,14 +84,6 @@ func Destroy() {
 // AddResizeHandler sets the resize handler.
 func AddResizeHandler(handler func(int, int)) {
 	resizeHandlers = append(resizeHandlers, handler)
-}
-
-// SetTitle sets the window title.
-func SetTitle(title string) {
-	if winHandle != nil {
-		winHandle.SetTitle(title)
-	}
-	windowSettings.title = title
 }
 
 // SetVideoMode set the video mode for the window.
@@ -116,7 +108,7 @@ func SetVideoMode(fs bool, w, h int) {
 		}
 		if winHandle != nil {
 			winHandle.SetMonitor(glfw.GetPrimaryMonitor(), 0, 0, w, h, refresh)
-			SetVSync(windowSettings.vsync)
+
 		}
 	} else {
 		if w == -1 || h == -1 {
@@ -125,27 +117,9 @@ func SetVideoMode(fs bool, w, h int) {
 		}
 		if winHandle != nil {
 			winHandle.SetMonitor(nil, 100, 100, w, h, refresh)
-			SetVSync(windowSettings.vsync)
+
 		}
 	}
-}
-
-// SetVSync enables or disables vertical synchronization.
-func SetVSync(on bool) {
-	windowSettings.vsync = on
-
-	if winHandle != nil {
-		interval := 0
-		if on {
-			interval = 1
-		}
-		glfw.SwapInterval(interval)
-	}
-}
-
-// VSync return whether vertical synchronization is enabled or not.
-func VSync() bool {
-	return windowSettings.vsync
 }
 
 // Size returns the window size.
