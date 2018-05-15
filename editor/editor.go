@@ -24,7 +24,7 @@ func setVsync(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&tmp)
 
 	EditorChannel <- func() {
-		window.SetVerticalSync(tmp.Vsync)
+		window.SetVSync(tmp.Vsync)
 	}
 	w.WriteHeader(http.StatusOK)
 }
@@ -32,7 +32,7 @@ func getVsync(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(struct {
 		Vsync bool `json:"vsync"`
 	}{
-		Vsync: window.VerticalSync(),
+		Vsync: window.VSync(),
 	})
 }
 func setDisplayMode(w http.ResponseWriter, r *http.Request) {

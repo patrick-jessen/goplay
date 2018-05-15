@@ -29,31 +29,22 @@ var windowSettings = struct {
 var winHandle *glfw.Window
 var resizeHandlers []func(int, int)
 
-// init initializes the window system.
-func init() {
+// Create creates the window.
+func Create() {
 	if err := glfw.Init(); err != nil {
 		panic("failed to initialize window system:\n" + err.Error())
 	}
 	glfw.WindowHint(glfw.ContextVersionMajor, 3)
 	glfw.WindowHint(glfw.ContextVersionMinor, 2)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-}
 
-// Deinitialize deinitializes the window system.
-// Should be called before exiting application.
-func Deinitialize() {
-	glfw.Terminate()
-}
-
-// Create creates the window.
-func Create() {
 	var err error
 
-	// mode := glfw.GetPrimaryMonitor().GetVideoMode()
-	// glfw.WindowHint(glfw.RedBits, mode.RedBits)
-	// glfw.WindowHint(glfw.GreenBits, mode.GreenBits)
-	// glfw.WindowHint(glfw.BlueBits, mode.BlueBits)
-	// glfw.WindowHint(glfw.RefreshRate, mode.RefreshRate)
+	mode := glfw.GetPrimaryMonitor().GetVideoMode()
+	glfw.WindowHint(glfw.RedBits, mode.RedBits)
+	glfw.WindowHint(glfw.GreenBits, mode.GreenBits)
+	glfw.WindowHint(glfw.BlueBits, mode.BlueBits)
+	glfw.WindowHint(glfw.RefreshRate, mode.RefreshRate)
 	glfw.WindowHint(glfw.Samples, windowSettings.msaa)
 
 	var fsMon *glfw.Monitor
@@ -75,7 +66,7 @@ func Create() {
 		panic("failed to initialize OpenGL:/n" + err.Error())
 	}
 
-	SetVerticalSync(windowSettings.vsync)
+	SetVSync(windowSettings.vsync)
 
 	gl.Viewport(0, 0, int32(windowSettings.width), int32(windowSettings.height))
 	gl.Enable(gl.CULL_FACE)
@@ -84,15 +75,15 @@ func Create() {
 	gl.Enable(gl.MULTISAMPLE)
 }
 
+// Destroy closes the window.
+func Destroy() {
+	winHandle.Destroy()
+	glfw.Terminate()
+}
+
 // AddResizeHandler sets the resize handler.
 func AddResizeHandler(handler func(int, int)) {
 	resizeHandlers = append(resizeHandlers, handler)
-}
-
-// Close closes the window.
-func Close() {
-	winHandle.Destroy()
-	glfw.Terminate()
 }
 
 // SetTitle sets the window title.
@@ -106,6 +97,15 @@ func SetTitle(title string) {
 // SetVideoMode set the video mode for the window.
 // if fs is true, the window will become full-screen.
 func SetVideoMode(fs bool, w, h int) {
+
+	windowSettings.fullscreen = fs
+	windowSettings.width = w
+	windowSettings.height = h
+
+	if winHandle == nil {
+		return
+	}
+
 	vm := glfw.GetPrimaryMonitor().GetVideoMode()
 	refresh := vm.RefreshRate
 
@@ -116,7 +116,7 @@ func SetVideoMode(fs bool, w, h int) {
 		}
 		if winHandle != nil {
 			winHandle.SetMonitor(glfw.GetPrimaryMonitor(), 0, 0, w, h, refresh)
-			SetVerticalSync(windowSettings.vsync)
+			SetVSync(windowSettings.vsync)
 		}
 	} else {
 		if w == -1 || h == -1 {
@@ -125,18 +125,15 @@ func SetVideoMode(fs bool, w, h int) {
 		}
 		if winHandle != nil {
 			winHandle.SetMonitor(nil, 100, 100, w, h, refresh)
-			SetVerticalSync(windowSettings.vsync)
+			SetVSync(windowSettings.vsync)
 		}
 	}
-
-	windowSettings.fullscreen = fs
-	windowSettings.width = w
-	windowSettings.height = h
 }
 
-// SetVerticalSync enables or disables vertical synchronization.
-func SetVerticalSync(on bool) {
+// SetVSync enables or disables vertical synchronization.
+func SetVSync(on bool) {
 	windowSettings.vsync = on
+
 	if winHandle != nil {
 		interval := 0
 		if on {
@@ -146,8 +143,8 @@ func SetVerticalSync(on bool) {
 	}
 }
 
-// VerticalSync return whether vsync is enabled or not.
-func VerticalSync() bool {
+// VSync return whether vertical synchronization is enabled or not.
+func VSync() bool {
 	return windowSettings.vsync
 }
 

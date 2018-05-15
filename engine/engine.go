@@ -17,10 +17,9 @@ type Application interface {
 // Start starts the engine using the given application.
 func Start(a Application) {
 	go editor.Start()
-	defer window.Deinitialize()
 
 	window.Create()
-	defer window.Close()
+	defer window.Destroy()
 
 	a.OnStart()
 	defer a.OnExit()
