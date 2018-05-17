@@ -83,19 +83,23 @@ func (m Model) mountChild(sn *scene.Node, gn *gltf.Node) {
 
 			// Set material
 			if mr.Mat == nil {
-				gmat := g.Materials[p.Material]
-				mat := material.NewPBRMaterial()
-				if gmat.PbrMetallicRoughness.BaseColorTexture.Index >= 0 {
-					t := g.Textures[gmat.PbrMetallicRoughness.BaseColorTexture.Index]
-					tsrc := g.Images[t.Source]
-					mat.DiffuseTex = texture.Load(tsrc.URI)
+				if p.Material >= 0 {
+					gmat := g.Materials[p.Material]
+					mat := material.NewPBRMaterial()
+					if gmat.PbrMetallicRoughness.BaseColorTexture.Index >= 0 {
+						t := g.Textures[gmat.PbrMetallicRoughness.BaseColorTexture.Index]
+						tsrc := g.Images[t.Source]
+						mat.DiffuseTex = texture.Load(tsrc.URI)
+					}
+					if gmat.NormalTexture.Index >= 0 {
+						t := g.Textures[gmat.NormalTexture.Index]
+						tsrc := g.Images[t.Source]
+						mat.NormalTex = texture.Load(tsrc.URI)
+					}
+					mr.Mat = &mat
+				} else {
+					mr.Mat = material.NewDefaultMaterial()
 				}
-				if gmat.NormalTexture.Index >= 0 {
-					t := g.Textures[gmat.NormalTexture.Index]
-					tsrc := g.Images[t.Source]
-					mat.NormalTex = texture.Load(tsrc.URI)
-				}
-				mr.Mat = &mat
 			}
 		}
 

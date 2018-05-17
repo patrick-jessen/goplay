@@ -24,7 +24,7 @@ struct DirLight {
   vec3 direction;
   vec3 color;
 };
-DirLight dirLight = DirLight(normalize(vec3(0, 0, -5)), vec3(1,1,1));
+DirLight dirLight = DirLight(normalize(vec3(0, -5, 5)), vec3(1,1,1));
 
 
 ////////////////////////////////////////////////////////////////////////////////

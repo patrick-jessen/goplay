@@ -18,8 +18,8 @@ type pbrMaterial struct {
 func NewPBRMaterial() pbrMaterial {
 	return pbrMaterial{
 		Shader:     shader.Load("pbr"),
-		DiffuseTex: texture.Load("diffuse.jpg"),
-		NormalTex:  texture.Load("normal.jpg"),
+		DiffuseTex: texture.Load("default_diff.jpg"),
+		NormalTex:  texture.Load("default_norm.jpg"),
 	}
 }
 
@@ -28,3 +28,10 @@ func (m pbrMaterial) Apply() {
 	m.DiffuseTex.Bind(0)
 	m.NormalTex.Bind(1)
 }
+
+type defaultMaterial struct{}
+
+func NewDefaultMaterial() Material {
+	return defaultMaterial{}
+}
+func (defaultMaterial) Apply() {}

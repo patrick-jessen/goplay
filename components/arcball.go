@@ -5,6 +5,7 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
+	"github.com/patrick-jessen/goplay/engine/log"
 	"github.com/patrick-jessen/goplay/engine/scene"
 	"github.com/patrick-jessen/goplay/engine/shader"
 	"github.com/patrick-jessen/goplay/engine/window"
@@ -26,6 +27,8 @@ const damping = 0.90
 
 func (c *ArcBall) Initialize(n *scene.Node) {
 	c.node = n
+
+	log.Warn("ArcBall.Update currently calls shader.SetViewPosition(). Why can't this be done elsewhere?")
 }
 func (c *ArcBall) Render() {}
 
