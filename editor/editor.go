@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
+	"github.com/patrick-jessen/goplay/engine/texture"
 	"github.com/patrick-jessen/goplay/engine/window"
 )
 
@@ -76,6 +77,55 @@ func windowApply(w http.ResponseWriter, r *http.Request) {
 	EditorChannel <- func() {
 		window.Settings.Apply()
 	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func textureGetFilter(w http.ResponseWriter, r *http.Request) {
+	f, a := texture.Settings.Filter()
+	json.NewEncoder(w).Encode(struct {
+		Filter int `json:"filter"`
+		Aniso  int `json:"aniso"`
+	}{
+		Filter: int(f),
+		Aniso:  a,
+	})
+}
+func textureSetFilter(w http.ResponseWriter, r *http.Request) {
+	tmp := struct {
+		Filter int `json:"filter"`
+		Aniso  int `json:"aniso"`
+	}{}
+	json.NewDecoder(r.Body).Decode(&tmp)
+
+	EditorChannel <- func() {
+		texture.Settings.SetFilter(texture.Filter(tmp.Filter), tmp.Aniso)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func textureGetResolution(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(struct {
+		Res int `json:"res"`
+	}{
+		Res: int(texture.Settings.Resolution()),
+	})
+}
+func textureSetResolution(w http.ResponseWriter, r *http.Request) {
+	tmp := struct {
+		Res int `json:"res"`
+	}{}
+	json.NewDecoder(r.Body).Decode(&tmp)
+
+	EditorChannel <- func() {
+		texture.Settings.SetResolution(texture.Resolution(tmp.Res))
+	}
+	w.WriteHeader(http.StatusOK)
+}
+func textureApply(w http.ResponseWriter, r *http.Request) {
+	EditorChannel <- func() {
+		texture.Settings.Apply()
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func Start() {
@@ -89,6 +139,13 @@ func Start() {
 	window.HandleFunc("/size", windowGetSize).Methods("GET")
 	window.HandleFunc("/size", windowSetSize).Methods("POST")
 	window.HandleFunc("/apply", windowApply).Methods("GET")
+
+	texture := router.PathPrefix("/texture").Subrouter()
+	texture.HandleFunc("/filter", textureGetFilter).Methods("GET")
+	texture.HandleFunc("/filter", textureSetFilter).Methods("POST")
+	texture.HandleFunc("/resolution", textureGetResolution).Methods("GET")
+	texture.HandleFunc("/resolution", textureSetResolution).Methods("POST")
+	texture.HandleFunc("/apply", textureApply).Methods("GET")
 
 	corsObj := handlers.AllowedOrigins([]string{"*"})
 

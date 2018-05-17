@@ -7,7 +7,7 @@ export default {
       fetch(baseURL + "window/apply");
     },
     getVsync(then) {
-      return fetch(baseURL + "window/vsync")
+      fetch(baseURL + "window/vsync")
         .then(r => r.json()).then(r => {
           then(r.vsync);
         })
@@ -42,5 +42,35 @@ export default {
         body: JSON.stringify({width,height})
       });
     },
+  },
+
+  texture: {
+    getFilter(then) {
+      fetch(baseURL + "texture/filter")
+        .then(r => r.json()).then(r => {
+          then(r.filter, r.aniso);
+        })
+    },
+    setFilter(f, a) {
+      fetch(baseURL + "texture/filter", {
+        method: "POST", 
+        body: JSON.stringify({filter:f,aniso:a})
+      });
+    },
+    getResolution(then) {
+      fetch(baseURL + "texture/resolution")
+        .then(r => r.json()).then(r => {
+          then(r.res);
+        })
+    },
+    setResolution(r) {
+      fetch(baseURL + "texture/resolution", {
+        method: "POST", 
+        body: JSON.stringify({res:r})
+      });
+    },
+    apply() {
+      fetch(baseURL + "texture/apply");
+    }
   }
 }

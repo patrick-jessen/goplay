@@ -1,22 +1,6 @@
 import { h, Component } from 'preact';
+import Option from "./option";
 import api from "./api"
-
-function Option({text, selected, options, onSelect, disabled}) {
-  return (
-    <tr>
-      <td>{text}</td>
-      <td>
-        <select onChange={(e)=>onSelect(e.target.value)} disabled={disabled}>
-          {
-            options.map(o => (
-              <option selected={o == selected}>{o}</option>
-            ))
-          }
-        </select>
-      </td>
-    </tr>
-  );
-}
 
 export default class Window extends Component {
   constructor() {

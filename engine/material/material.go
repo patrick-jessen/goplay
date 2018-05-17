@@ -7,14 +7,14 @@ import (
 
 type Material struct {
 	Shader   shader.Shader
-	Textures []texture.Texture
+	Textures []*texture.Texture
 }
 
 func New() Material {
 	return Material{
 		Shader: shader.Load("basic"),
-		Textures: []texture.Texture{
-			texture.Load("default"),
+		Textures: []*texture.Texture{
+			texture.Load("default.png"),
 		},
 	}
 }

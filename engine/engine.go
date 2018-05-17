@@ -5,6 +5,7 @@ package engine
 import (
 	"github.com/patrick-jessen/goplay/editor"
 	"github.com/patrick-jessen/goplay/engine/window"
+	"github.com/patrick-jessen/goplay/engine/worker"
 )
 
 // Application is the base of the application.
@@ -31,6 +32,8 @@ func Start(a Application) {
 		select {
 		case ef := <-editor.EditorChannel:
 			ef()
+		case wf := <-worker.Channel:
+			wf()
 		default:
 		}
 	}
