@@ -13,6 +13,24 @@ export default class Texture extends Component {
 
     this.onFilter = this.onFilter.bind(this);
     this.onRes = this.onRes.bind(this);
+
+    api.texture.getFilter((f, a) => {
+      let filter;
+      if(a == 16) filter = "16x Anisotropic";
+      else if(a == 8) filter = "8x Anisotropic";
+      else if(a == 4) filter = "4x Anisotropic";
+      else if(a == 2) filter = "2x Anisotropic";
+      else if(f == 0x2703) filter = "Trilinear";
+      else filter = "Bilinear";
+      this.setState({filter});
+    });
+    api.texture.getResolution(r => {
+      let res;
+      if (r == 16) res = "Low";
+      else if (r == 8) res = "Medium";
+      else if (r == 1) res = "High";
+      this.setState({res});
+    });
   }
 
   onFilter(f) {
@@ -48,11 +66,11 @@ export default class Texture extends Component {
     this.setState({res:r});
 
     if(r == "Low")
-      api.texture.setResolution(0);
-    else if(r == "Normal")
-      api.texture.setResolution(1);
+      api.texture.setResolution(16);
+    else if(r == "Medium")
+      api.texture.setResolution(8);
     else if (r == "High")
-      api.texture.setResolution(2);
+      api.texture.setResolution(1);
   }
 
   onApply() {
@@ -81,7 +99,7 @@ export default class Texture extends Component {
             selected={res}
             options={[
               "Low", 
-              "Normal", 
+              "Medium", 
               "High"]}
             onSelect={this.onRes}
           />

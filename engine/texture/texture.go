@@ -6,13 +6,13 @@ import (
 	_ "image/jpeg" // Support JPEG format
 	_ "image/png"  // Support PNG format
 	"os"
-	"path/filepath"
-	"strings"
 
+	"github.com/nfnt/resize"
+
+	"github.com/patrick-jessen/goplay/engine/log"
 	"github.com/patrick-jessen/goplay/engine/worker"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
-	"github.com/patrick-jessen/goplay/engine/log"
 )
 
 const (
@@ -25,7 +25,7 @@ var (
 	cache    = make(map[string]*Texture)
 	Settings = settings{
 		curFilter: gl.LINEAR_MIPMAP_NEAREST,
-		curRes:    Normal,
+		curRes:    1,
 	}
 )
 
@@ -36,14 +36,6 @@ const (
 	Trilinear Filter = gl.LINEAR_MIPMAP_LINEAR
 )
 
-type Resolution int32
-
-const (
-	Low    Resolution = 0
-	Normal Resolution = 1
-	High   Resolution = 2
-)
-
 type settings struct {
 	curFilter Filter
 	newFilter Filter
@@ -51,31 +43,33 @@ type settings struct {
 	curAniso float32
 	newAniso float32
 
-	curRes Resolution
-	newRes Resolution
+	curRes uint
+	newRes uint
 }
 
 func (s *settings) Filter() (Filter, int) {
 	return s.curFilter, int(s.curAniso)
 }
 func (s *settings) SetFilter(f Filter, aniso int) {
-
-	log.Info("setting filter", "f", f == Bilinear, "aniso", aniso)
 	s.newFilter = f
+	s.newAniso = float32(aniso)
 
 	// Limit to max available aniso level.
 	var maxAniso float32
 	gl.GetFloatv(maxTextureMaxAnisotropyExt, &maxAniso)
-	if int(maxAniso) < aniso {
-		aniso = int(maxAniso)
+	if maxAniso < s.newAniso {
+		s.newAniso = maxAniso
 	}
-	s.newAniso = float32(aniso)
 }
 
-func (s *settings) Resolution() Resolution {
+func (s *settings) Resolution() uint {
 	return s.curRes
 }
-func (s *settings) SetResolution(r Resolution) {
+func (s *settings) SetResolution(r uint) {
+	if r == 0 {
+		log.Warn("resolution must be at least 1", "r", r)
+		r = 1
+	}
 	s.newRes = r
 }
 
@@ -83,19 +77,16 @@ func (s *settings) Apply() {
 	for _, t := range cache {
 
 		if s.curRes != s.newRes {
-			_, ok := t.fileName()
-			if ok {
-				// Unload texture to trigger reload of new resolution
-				t.Unload()
-				continue
-			}
+			// Unload texture to trigger reload of new resolution
+			t.loaded = false
+			continue
 		}
 
 		gl.BindTexture(gl.TEXTURE_2D, t.handle)
 		if s.curFilter != s.newFilter {
 			if s.newFilter == Bilinear {
 				// Must reload to revert to bilinear
-				t.Unload()
+				t.loaded = false
 				continue
 			}
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, int32(s.newFilter))
@@ -125,30 +116,10 @@ func Load(name string) *Texture {
 
 // Texture represents an OpenGL texture.
 type Texture struct {
+	loaded  bool
 	loading bool
 	handle  uint32
 	file    string
-}
-
-// fileName returns the actual file used (with respect to resolution).
-// Second argument is true, if texture has a version for the current resolution.
-func (t *Texture) fileName() (string, bool) {
-	fext := filepath.Ext(t.file)
-	fname := strings.TrimSuffix(t.file, fext)
-
-	var file string
-	switch Settings.curRes {
-	case Low:
-		file = fname + "_low" + fext
-	case Normal:
-		file = fname + fext
-	case High:
-		file = fname + "_high" + fext
-	}
-	if _, e := os.Stat(textureDir + file); e != nil {
-		return (fname + fext), false
-	}
-	return file, true
 }
 
 // Unload unloads the texture and its resources.
@@ -159,21 +130,23 @@ func (t *Texture) Unload() {
 
 // Load loads the texture.
 func (t *Texture) load() {
-	file, _ := t.fileName()
 	t.loading = true
+	res := Settings.curRes
 
 	go func() {
-		img := loadImage(textureDir + file)
+		img := loadImage(textureDir+t.file, res)
 		worker.CallSynchronized(func() {
+			t.Unload()
 			t.handle = newTexture(img)
 			t.loading = false
+			t.loaded = true
 		})
 	}()
 }
 
 // Bind binds the texture to the given texture location.
 func (t *Texture) Bind(idx uint32) {
-	if t.handle == 0 {
+	if !t.loaded && !t.loading {
 		t.load()
 	}
 
@@ -212,19 +185,23 @@ func newTexture(data *image.RGBA) uint32 {
 }
 
 // loadImage loads an image from file.
-func loadImage(file string) *image.RGBA {
+func loadImage(file string, res uint) *image.RGBA {
 	imgFile, err := os.Open(file)
 	if err != nil {
-		panic("texture not found on disk")
+		log.Panic("could not open texture file", "imgFile", imgFile, "error", err)
 	}
 	img, _, err := image.Decode(imgFile)
 	if err != nil {
-		panic("could not decode image")
+		log.Panic("could not decode image", "error", err)
 	}
+
+	width := img.Bounds().Dx() / int(res)
+	height := img.Bounds().Dy() / int(res)
+	img = resize.Resize(uint(width), uint(height), img, resize.Bicubic)
 
 	rgba := image.NewRGBA(img.Bounds())
 	if rgba.Stride != rgba.Rect.Size().X*4 {
-		panic("unsupported stride")
+		log.Panic("unsupported stride", "stride", rgba.Stride)
 	}
 	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
 

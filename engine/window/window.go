@@ -1,6 +1,7 @@
 package window
 
 import (
+	"log"
 	"runtime"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -17,13 +18,11 @@ var resizeHandlers []func(int, int)
 // Create creates the window.
 func Create() {
 	if err := glfw.Init(); err != nil {
-		panic("failed to initialize window system:\n" + err.Error())
+		log.Panic("failed to initialize window system", "error", err)
 	}
 	glfw.WindowHint(glfw.ContextVersionMajor, 3)
 	glfw.WindowHint(glfw.ContextVersionMinor, 2)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-
-	var err error
 
 	mode := glfw.GetPrimaryMonitor().GetVideoMode()
 	glfw.WindowHint(glfw.RedBits, mode.RedBits)
@@ -31,11 +30,13 @@ func Create() {
 	glfw.WindowHint(glfw.BlueBits, mode.BlueBits)
 	glfw.WindowHint(glfw.RefreshRate, mode.RefreshRate)
 
+	var err error
 	winHandle, err = glfw.CreateWindow(800, 600, "GoPlay", nil, nil)
 	if err != nil {
-		panic("failed to create window:\n" + err.Error())
+		log.Panic("failed to create window", "error", err)
 	}
 	winHandle.MakeContextCurrent()
+
 	winHandle.SetKeyCallback(keyCallback)
 	winHandle.SetMouseButtonCallback(mouseButtonCallback)
 	winHandle.SetCursorPosCallback(cursorPosCallback)
@@ -43,7 +44,7 @@ func Create() {
 	winHandle.SetFramebufferSizeCallback(resizeCallback)
 
 	if err := gl.Init(); err != nil {
-		panic("failed to initialize OpenGL:/n" + err.Error())
+		log.Panic("failed to initialize OpenGL", "error", err)
 	}
 
 	Settings.Apply()
@@ -74,18 +75,15 @@ func AddResizeHandler(handler func(int, int)) {
 //   window.Update()
 // }
 func ShouldClose() bool {
-	if winHandle == nil {
-		return true
-	}
 	return winHandle.ShouldClose()
 }
 
 // Update polls events and swaps the content to front.
 // For usage, see ShouldClose().
 func Update() {
+	winHandle.SwapBuffers()
 	updateInput()
 	glfw.PollEvents()
-	winHandle.SwapBuffers()
 }
 
 // resizeCallback handles window resize.

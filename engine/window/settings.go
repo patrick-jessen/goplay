@@ -5,6 +5,7 @@ import (
 	"github.com/patrick-jessen/goplay/engine/log"
 )
 
+// Settings is the window settings.
 var Settings settings
 
 type settings struct {

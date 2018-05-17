@@ -117,7 +117,7 @@ func textureSetResolution(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&tmp)
 
 	EditorChannel <- func() {
-		texture.Settings.SetResolution(texture.Resolution(tmp.Res))
+		texture.Settings.SetResolution(uint(tmp.Res))
 	}
 	w.WriteHeader(http.StatusOK)
 }
