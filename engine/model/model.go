@@ -84,11 +84,16 @@ func (m Model) mountChild(sn *scene.Node, gn *gltf.Node) {
 			// Set material
 			if mr.Mat == nil {
 				gmat := g.Materials[p.Material]
-				mat := material.New()
+				mat := material.NewPBRMaterial()
 				if gmat.PbrMetallicRoughness.BaseColorTexture.Index >= 0 {
 					t := g.Textures[gmat.PbrMetallicRoughness.BaseColorTexture.Index]
 					tsrc := g.Images[t.Source]
-					mat.Textures[0] = texture.Load(tsrc.URI)
+					mat.DiffuseTex = texture.Load(tsrc.URI)
+				}
+				if gmat.NormalTexture.Index >= 0 {
+					t := g.Textures[gmat.NormalTexture.Index]
+					tsrc := g.Images[t.Source]
+					mat.NormalTex = texture.Load(tsrc.URI)
 				}
 				mr.Mat = &mat
 			}
@@ -113,7 +118,7 @@ func (m Model) mountChild(sn *scene.Node, gn *gltf.Node) {
 type MeshRenderer struct {
 	node  *scene.Node
 	geoms []*geometry.Geometry
-	Mat   *material.Material
+	Mat   material.Material
 }
 
 func (mr *MeshRenderer) Initialize(n *scene.Node) {
@@ -122,7 +127,10 @@ func (mr *MeshRenderer) Initialize(n *scene.Node) {
 func (mr *MeshRenderer) Update() {
 }
 func (mr *MeshRenderer) Render() {
-	shader.SetModelMatrix(mr.node.WorldTransform())
+
+	world := mr.node.WorldTransform()
+	shader.SetModelMatrix(world)
+
 	mr.Mat.Apply()
 
 	for _, g := range mr.geoms {

@@ -5,23 +5,26 @@ import (
 	"github.com/patrick-jessen/goplay/engine/texture"
 )
 
-type Material struct {
-	Shader   shader.Shader
-	Textures []*texture.Texture
+type Material interface {
+	Apply()
 }
 
-func New() Material {
-	return Material{
-		Shader: shader.Load("basic"),
-		Textures: []*texture.Texture{
-			texture.Load("default.png"),
-		},
+type pbrMaterial struct {
+	Shader     shader.Shader
+	DiffuseTex *texture.Texture
+	NormalTex  *texture.Texture
+}
+
+func NewPBRMaterial() pbrMaterial {
+	return pbrMaterial{
+		Shader:     shader.Load("pbr"),
+		DiffuseTex: texture.Load("diffuse.jpg"),
+		NormalTex:  texture.Load("normal.jpg"),
 	}
 }
 
-func (m Material) Apply() {
+func (m pbrMaterial) Apply() {
 	m.Shader.Use()
-	for i, t := range m.Textures {
-		t.Bind(uint32(i))
-	}
+	m.DiffuseTex.Bind(0)
+	m.NormalTex.Bind(1)
 }

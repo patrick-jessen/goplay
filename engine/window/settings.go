@@ -6,7 +6,14 @@ import (
 )
 
 // Settings is the window settings.
-var Settings settings
+var Settings = settings{
+	curVSync: false,
+	newVSync: false,
+	curTitle: "GoPlay",
+	newTitle: "GoPlay",
+	newSize:  [2]int{800, 600},
+	newFS:    false,
+}
 
 type settings struct {
 	curVSync bool

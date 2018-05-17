@@ -56,6 +56,18 @@ func SetModelMatrix(m mgl.Mat4) {
 	gl.BufferSubData(gl.UNIFORM_BUFFER, 64, 64, gl.Ptr(&m[0]))
 }
 
+// SetNormalMatrix sets the normal matrix for all shaders.
+func SetNormalMatrix(m mgl.Mat3) {
+	// gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
+	// gl.BufferSubData(gl.UNIFORM_BUFFER, 128, 64, gl.Ptr(&m[0]))
+}
+
+// SetViewPosition sets the view position for all shaders.
+func SetViewPosition(pos mgl.Vec3) {
+	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 128, 12, gl.Ptr(&pos[0]))
+}
+
 // loadProgram loads shaders from files and creates a shader program.
 func loadProgram(name string) uint32 {
 	file := shaderDir + name + "/" + name
@@ -90,6 +102,7 @@ func loadProgram(name string) uint32 {
 
 	// Other uniforms
 	gl.Uniform1i(gl.GetUniformLocation(handle, gl.Str("tex0\x00")), 0)
+	gl.Uniform1i(gl.GetUniformLocation(handle, gl.Str("tex1\x00")), 1)
 
 	return handle
 }
@@ -158,7 +171,7 @@ func initializeUniformBuffer() {
 	var handle uint32
 	gl.GenBuffers(1, &handle)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, handle)
-	gl.BufferData(gl.UNIFORM_BUFFER, 128, gl.Ptr(buf.Bytes()), gl.STATIC_DRAW)
+	gl.BufferData(gl.UNIFORM_BUFFER, 144, gl.Ptr(buf.Bytes()), gl.STATIC_DRAW)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 0, handle)
 
 	ubo = handle

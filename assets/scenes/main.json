@@ -2,10 +2,11 @@
     "children":{
         "duck":{
             "transform":{
-                "scale": [0.01, 0.01, 0.01],
-                "position":[0, 1, 0]
+                "scale": [75, 75, 75],
+                "rotation": [0,0,0,1],
+                "position":[0, 1.75, 0]
             },
-            "mount": "duck"
+            "mount": "BoomBox"
         },
         "box":{
             "mount": "cube"

@@ -6,6 +6,7 @@ import (
 	mgl "github.com/go-gl/mathgl/mgl32"
 
 	"github.com/patrick-jessen/goplay/engine/scene"
+	"github.com/patrick-jessen/goplay/engine/shader"
 	"github.com/patrick-jessen/goplay/engine/window"
 )
 
@@ -83,4 +84,6 @@ func (c *ArcBall) Update() {
 
 	view := mgl.LookAtV(pos, mgl.Vec3{}, mgl.Vec3{0, 1, 0})
 	c.node.SetMatrix(view)
+
+	shader.SetViewPosition(pos)
 }

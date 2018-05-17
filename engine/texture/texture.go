@@ -24,8 +24,12 @@ const (
 var (
 	cache    = make(map[string]*Texture)
 	Settings = settings{
-		curFilter: gl.LINEAR_MIPMAP_NEAREST,
+		curFilter: Trilinear,
+		newFilter: Trilinear,
 		curRes:    1,
+		newRes:    1,
+		curAniso:  16,
+		newAniso:  16,
 	}
 )
 
