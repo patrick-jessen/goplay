@@ -14,8 +14,8 @@ type settings struct {
 	curTitle string
 	newTitle string
 
-	curRes [2]int
-	newRes [2]int
+	newSize [2]int
+	newFS   bool
 }
 
 func (s *settings) SetVSync(on bool) {
@@ -31,11 +31,19 @@ func (s *settings) SetTitle(str string) {
 func (s *settings) Title() string {
 	return s.curTitle
 }
-func (s *settings) SetResolution(width, height int) {
-	s.newRes = [2]int{width, height}
+
+func (s *settings) SetSize(width, height int) {
+	s.newSize = [2]int{width, height}
 }
-func (s *settings) Resolution() (width, height int) {
-	return s.curRes[0], s.curRes[1]
+func (s *settings) Size() (width, height int) {
+	return winHandle.GetSize()
+}
+
+func (s *settings) SetFullScreen(on bool) {
+	s.newFS = on
+}
+func (s *settings) FullScreen() bool {
+	return winHandle.GetMonitor() != nil
 }
 
 func (s *settings) Apply() {
@@ -44,19 +52,36 @@ func (s *settings) Apply() {
 		return
 	}
 
+	// Apply title
+	if s.Title() != s.newTitle {
+		winHandle.SetTitle(s.newTitle)
+		s.curTitle = s.newTitle
+	}
+
+	// Apply size
+	if w, h := s.Size(); w != s.newSize[0] || h != s.newSize[1] {
+		winHandle.SetSize(s.newSize[0], s.newSize[1])
+	}
+
+	// Apply full screen
+	if s.FullScreen() != s.newFS {
+		var mon *glfw.Monitor
+		if s.newFS {
+			mon = glfw.GetPrimaryMonitor()
+		}
+		winHandle.SetMonitor(mon, 0, 0, s.newSize[0], s.newSize[1], glfw.DontCare)
+
+		// Force reset of vsync
+		s.curVSync = !s.newVSync
+	}
+
 	// Apply vsync
-	if s.curVSync != s.newVSync {
+	if s.VSync() != s.newVSync {
 		interval := 0
 		if s.newVSync {
 			interval = 1
 		}
 		glfw.SwapInterval(interval)
 		s.curVSync = s.newVSync
-	}
-
-	// Apply title
-	if s.curTitle != s.newTitle {
-		winHandle.SetTitle(s.newTitle)
-		s.curTitle = s.newTitle
 	}
 }

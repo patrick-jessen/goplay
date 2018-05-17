@@ -66,7 +66,7 @@ func newTexture(data *image.RGBA) uint32 {
 	gl.BindTexture(gl.TEXTURE_2D, handle)
 
 	// Set parameters
-	var minFilter int32 = gl.LINEAR
+	var minFilter int32 = gl.NEAREST
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)

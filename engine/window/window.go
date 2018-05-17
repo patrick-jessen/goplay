@@ -11,21 +11,6 @@ func init() {
 	runtime.LockOSThread()
 }
 
-var windowSettings = struct {
-	width, height int
-	fullscreen    bool
-	title         string
-	vsync         bool
-	msaa          int
-}{
-	width:      800,
-	height:     600,
-	title:      "GoPlay",
-	vsync:      false,
-	msaa:       4,
-	fullscreen: false,
-}
-
 var winHandle *glfw.Window
 var resizeHandlers []func(int, int)
 
@@ -45,13 +30,8 @@ func Create() {
 	glfw.WindowHint(glfw.GreenBits, mode.GreenBits)
 	glfw.WindowHint(glfw.BlueBits, mode.BlueBits)
 	glfw.WindowHint(glfw.RefreshRate, mode.RefreshRate)
-	glfw.WindowHint(glfw.Samples, windowSettings.msaa)
 
-	var fsMon *glfw.Monitor
-	if windowSettings.fullscreen {
-		fsMon = glfw.GetPrimaryMonitor()
-	}
-	winHandle, err = glfw.CreateWindow(windowSettings.width, windowSettings.height, windowSettings.title, fsMon, nil)
+	winHandle, err = glfw.CreateWindow(800, 600, "GoPlay", nil, nil)
 	if err != nil {
 		panic("failed to create window:\n" + err.Error())
 	}
@@ -68,11 +48,11 @@ func Create() {
 
 	Settings.Apply()
 
-	gl.Viewport(0, 0, int32(windowSettings.width), int32(windowSettings.height))
+	w, h := Settings.Size()
+	gl.Viewport(0, 0, int32(w), int32(h))
 	gl.Enable(gl.CULL_FACE)
 	gl.Enable(gl.FRAMEBUFFER_SRGB)
 	gl.Enable(gl.DEPTH_TEST)
-	gl.Enable(gl.MULTISAMPLE)
 }
 
 // Destroy closes the window.
@@ -84,47 +64,6 @@ func Destroy() {
 // AddResizeHandler sets the resize handler.
 func AddResizeHandler(handler func(int, int)) {
 	resizeHandlers = append(resizeHandlers, handler)
-}
-
-// SetVideoMode set the video mode for the window.
-// if fs is true, the window will become full-screen.
-func SetVideoMode(fs bool, w, h int) {
-
-	windowSettings.fullscreen = fs
-	windowSettings.width = w
-	windowSettings.height = h
-
-	if winHandle == nil {
-		return
-	}
-
-	vm := glfw.GetPrimaryMonitor().GetVideoMode()
-	refresh := vm.RefreshRate
-
-	if fs {
-		if w == -1 || h == -1 {
-			w = vm.Width
-			h = vm.Height
-		}
-		if winHandle != nil {
-			winHandle.SetMonitor(glfw.GetPrimaryMonitor(), 0, 0, w, h, refresh)
-
-		}
-	} else {
-		if w == -1 || h == -1 {
-			w = 800
-			h = 600
-		}
-		if winHandle != nil {
-			winHandle.SetMonitor(nil, 100, 100, w, h, refresh)
-
-		}
-	}
-}
-
-// Size returns the window size.
-func Size() [2]int {
-	return [2]int{windowSettings.width, windowSettings.height}
 }
 
 // ShouldClose indicates whether the window should close.
@@ -154,9 +93,7 @@ func resizeCallback(w *glfw.Window, width, height int) {
 	for _, r := range resizeHandlers {
 		r(width, height)
 	}
-	windowSettings.width = width
-	windowSettings.height = height
-	gl.Viewport(0, 0, int32(windowSettings.width), int32(windowSettings.height))
+	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
 // keyCallback is called when a key is pressed.

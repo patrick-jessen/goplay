@@ -26,75 +26,62 @@ export default class Window extends Component {
       vsync: "Disabled",
       mode: "Windowed",
       res: "1920x1080",
-      msaa: "4x",
       resolution: [1920, 1080]
     };
 
     // Get initial state
-    api.getVsync(v => {
-      if(v) this.setState({vsync:"Enabled"})
-      else this.setState({vsync:"Disabled"})
+    api.window.getVsync(v => {
+      if(v) this.setState({vsync:"Enabled"});
+      else this.setState({vsync:"Disabled"});
     });
+    api.window.getFullScreen(f => {
+      if(f) this.setState({mode:"Full screen"});
+      else this.setState({mode:"Windowed"});
+    });
+    api.window.getSize((w,h) => {
+      this.setState({
+        resolution: [w,h],
+        res: `${w}x${h}`
+      })
+    })
 
     this.onMode = this.onMode.bind(this);
     this.onRes = this.onRes.bind(this);
     this.onVsync = this.onVsync.bind(this);
-    this.onMSAA = this.onMSAA.bind(this);
+    this.onApply = this.onApply.bind(this);
   }
 
   onVsync(v) {
-    if(v == "Disabled") {
-      api.setVsync(false);
-      this.setState({vsync:"Disabled"});
-    }
-    else if (v == "Enabled") {
-      api.setVsync(true);
-      this.setState({vsync:"Enabled"});
-    }
+    if(v == "Disabled")
+      api.window.setVsync(false);
+    else if (v == "Enabled")
+      api.window.setVsync(true);
+
+    this.setState({vsync:v});
   }
 
   onMode(m) {
-    if(m == "Windowed") {
-      api.setDisplayMode(false, -1, -1);
-      this.setState({mode:"Windowed"});
-      
-    }
-    else {
-      api.setDisplayMode(true, this.state.resolution[0], this.state.resolution[1]);
-      this.setState({mode:"Fullscreen"});
-    }
+    if (m == "Windowed") 
+      api.window.setFullScreen(false);
+    else
+      api.window.setFullScreen(true);
+
+    this.setState({mode:m});
   }
 
   onRes(r) {
-    if(r == "1920x1080") {
-      this.setState({
-        res: "1920x1080",
-        resolution:[1920,1080]
-      })
-    }
-    else if (r == "1366x768"){
-      this.setState({
-        res: "1366x768",
-        resolution:[1366,768]
-      })
-    }
-    else if (r == "1280x1024"){
-      this.setState({
-        res: "1280x1024",
-        resolution:[1280,1024]
-      })
-    }
-    else if (r == "1280x800"){
-      this.setState({
-        res: "1280x800",
-        resolution:[1280,800]
-      })
-    }
-    api.setDisplayMode(true, this.state.resolution[0], this.state.resolution[1])
+    let spl = r.split("x");
+
+    this.setState({
+      res: r,
+      resolution:[parseInt(spl[0]), parseInt(spl[1])]
+    });
+
+    api.window.setSize(this.state.resolution[0], this.state.resolution[1]);
   }
 
-  onMSAA(m) {
-    this.setState({msaa:m});
+  onApply() {
+    api.window.apply();
   }
 
   render({}, {vsync, mode, res, msaa}) {
@@ -104,23 +91,16 @@ export default class Window extends Component {
           <Option 
             text="Display Mode"
             selected={mode}
-            options={["Windowed","Fullscreen"]} 
+            options={["Windowed","Full screen"]} 
             onSelect={this.onMode}
           />
 
           <Option 
             text="Resolution"
             selected={res}
-            options={["1920x1080","1366x768","1280x1024","1280x800"]}
+            options={["1920x1080","1366x768","1280x1024","1280x800", "1024x768"]}
             onSelect={this.onRes}
-            disabled={mode != "Fullscreen"}
-          />
-
-          <Option 
-            text="Multisampling"
-            selected={msaa} 
-            options={["Off","2x","4x","8x","16x"]} 
-            onSelect={this.onMSAA}
+            disabled={mode != "Full screen"}
           />
 
           <Option 
@@ -129,6 +109,8 @@ export default class Window extends Component {
             options={["Disabled","Enabled"]} 
             onSelect={this.onVsync}
           />
+
+          <button onClick={this.onApply}>Apply</button>
         </table>
       </div>
     );

@@ -12,6 +12,7 @@ const (
 	warnType  = "\033[33mWARN \033[0m"
 	errType   = "\033[31mERR  \033[0m"
 	panicType = "\033[37;41mPANIC\033[0m"
+	traceType = "\033[36mTRACE\033[0m"
 )
 
 func blue(val interface{}) string {
@@ -24,11 +25,11 @@ func log(typ string, msg string, vals ...interface{}) {
 		valsStr += fmt.Sprintf("%v=%v ", blue(vals[i]), vals[i+1])
 	}
 
-	_, file, line, _ := runtime.Caller(3)
+	_, file, line, _ := runtime.Caller(2)
 	a, _ := filepath.Abs(".")
 	f, _ := filepath.Rel(a, file)
 	f = filepath.FromSlash("./") + f
-	callerStr := fmt.Sprintf("%v:%v\n", f, line)
+	callerStr := fmt.Sprintf("%v:%v", f, line)
 
 	fmt.Printf("%v [%v] %v\t\t%v\t\t%v\n", typ, time.Now().Format("15:04:05.000"), msg, valsStr, callerStr)
 }
@@ -52,4 +53,12 @@ func Error(msg string, vals ...interface{}) {
 func Panic(msg string, vals ...interface{}) {
 	log(panicType, msg, vals...)
 	panic(msg)
+}
+
+// Trace prints the calling function name.
+func Trace() {
+	fn, _, _, _ := runtime.Caller(1)
+	name := runtime.FuncForPC(fn).Name()
+	name = filepath.Base(name)
+	log(traceType, name+"()")
 }

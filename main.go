@@ -38,7 +38,7 @@ func (a *app) OnExit() {}
 func main() {
 	window.Settings.SetVSync(true)
 	window.Settings.SetTitle("MyGame")
+	window.Settings.SetSize(1024, 768)
 
-	window.SetVideoMode(false, 1024, 768)
 	engine.Start(&app{})
 }

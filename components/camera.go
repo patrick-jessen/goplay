@@ -27,10 +27,10 @@ func New() *Camera {
 func (c *Camera) Initialize(n *scene.Node) {
 	c.node = n
 
-	ws := window.Size()
+	w, h := window.Settings.Size()
 	c.ProjectionMatrix = mgl.Perspective(
 		mgl.DegToRad(c.FOV),
-		float32(ws[0])/float32(ws[1]),
+		float32(w)/float32(h),
 		0.01, 1000.0)
 
 	window.AddResizeHandler(func(w, h int) {

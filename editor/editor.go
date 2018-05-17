@@ -7,17 +7,12 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
-	"github.com/patrick-jessen/goplay/engine/scene"
 	"github.com/patrick-jessen/goplay/engine/window"
 )
 
 var EditorChannel = make(chan func(), 10)
 
-func getScene(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(scene.Current())
-}
-
-func setVsync(w http.ResponseWriter, r *http.Request) {
+func windowSetVsync(w http.ResponseWriter, r *http.Request) {
 	tmp := struct {
 		Vsync bool `json:"vsync"`
 	}{}
@@ -25,37 +20,75 @@ func setVsync(w http.ResponseWriter, r *http.Request) {
 
 	EditorChannel <- func() {
 		window.Settings.SetVSync(tmp.Vsync)
-		window.Settings.Apply()
 	}
 	w.WriteHeader(http.StatusOK)
 }
-func getVsync(w http.ResponseWriter, r *http.Request) {
+func windowGetVsync(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(struct {
 		Vsync bool `json:"vsync"`
 	}{
 		Vsync: window.Settings.VSync(),
 	})
 }
-func setDisplayMode(w http.ResponseWriter, r *http.Request) {
+
+func windowGetFullScreen(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(struct {
+		FullScreen bool `json:"fullScreen"`
+	}{
+		FullScreen: window.Settings.FullScreen(),
+	})
+}
+func windowSetFullScreen(w http.ResponseWriter, r *http.Request) {
 	tmp := struct {
-		Fs bool `json:"fs"`
-		W  int  `json:"w"`
-		H  int  `json:"h"`
+		FullScreen bool `json:"fullScreen"`
 	}{}
 	json.NewDecoder(r.Body).Decode(&tmp)
 
 	EditorChannel <- func() {
-		window.SetVideoMode(tmp.Fs, tmp.W, tmp.H)
+		window.Settings.SetFullScreen(tmp.FullScreen)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+func windowGetSize(w http.ResponseWriter, r *http.Request) {
+	width, height := window.Settings.Size()
+	json.NewEncoder(w).Encode(struct {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}{
+		Width:  width,
+		Height: height,
+	})
+}
+func windowSetSize(w http.ResponseWriter, r *http.Request) {
+	tmp := struct {
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	}{}
+	json.NewDecoder(r.Body).Decode(&tmp)
+
+	EditorChannel <- func() {
+		window.Settings.SetSize(tmp.Width, tmp.Height)
 	}
 	w.WriteHeader(http.StatusOK)
 }
 
+func windowApply(w http.ResponseWriter, r *http.Request) {
+	EditorChannel <- func() {
+		window.Settings.Apply()
+	}
+}
+
 func Start() {
 	router := mux.NewRouter()
-	router.HandleFunc("/scene", getScene).Methods("GET")
-	router.HandleFunc("/vsync", getVsync).Methods("GET")
-	router.HandleFunc("/vsync", setVsync).Methods("POST")
-	router.HandleFunc("/displayMode", setDisplayMode).Methods("POST")
+
+	window := router.PathPrefix("/window").Subrouter()
+	window.HandleFunc("/vsync", windowGetVsync).Methods("GET")
+	window.HandleFunc("/vsync", windowSetVsync).Methods("POST")
+	window.HandleFunc("/fullScreen", windowGetFullScreen).Methods("GET")
+	window.HandleFunc("/fullScreen", windowSetFullScreen).Methods("POST")
+	window.HandleFunc("/size", windowGetSize).Methods("GET")
+	window.HandleFunc("/size", windowSetSize).Methods("POST")
+	window.HandleFunc("/apply", windowApply).Methods("GET")
 
 	corsObj := handlers.AllowedOrigins([]string{"*"})
 
