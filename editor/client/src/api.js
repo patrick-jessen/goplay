@@ -72,5 +72,23 @@ export default {
     apply() {
       fetch(baseURL + "texture/apply");
     }
+  },
+
+  renderer: {
+    getAA(then) {
+      fetch(baseURL + "renderer/aa")
+        .then(r => r.json()).then(r => {
+          then(r.aa);
+        })
+    },
+    setAA(a) {
+      fetch(baseURL + "renderer/aa", {
+        method: "POST", 
+        body: JSON.stringify({aa:a})
+      });
+    },
+    apply() {
+      fetch(baseURL + "renderer/apply");
+    }
   }
 }

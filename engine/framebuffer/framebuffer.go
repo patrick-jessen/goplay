@@ -1,9 +1,8 @@
 package framebuffer
 
 import (
-	"log"
-
 	"github.com/go-gl/gl/v3.2-core/gl"
+	"github.com/patrick-jessen/goplay/engine/log"
 )
 
 func Unbind() {

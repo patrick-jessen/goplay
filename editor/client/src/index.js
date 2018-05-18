@@ -1,6 +1,7 @@
 import { h, render, Component } from 'preact';
 import Window from "./window";
 import Texture from "./texture";
+import Renderer from "./renderer";
 
 class App extends Component {
   constructor() {
@@ -16,6 +17,9 @@ class App extends Component {
 
         <h4>Texture</h4>
         <Texture />
+
+        <h4>Renderer</h4>
+        <Renderer />
       </div>
     );
   }

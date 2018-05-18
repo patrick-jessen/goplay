@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/patrick-jessen/goplay/engine/renderer"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
@@ -128,6 +130,31 @@ func textureApply(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func rendererGetAA(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(struct {
+		AA int `json:"aa"`
+	}{
+		AA: int(renderer.Settings.Antialiasing()),
+	})
+}
+func rendererSetAA(w http.ResponseWriter, r *http.Request) {
+	tmp := struct {
+		AA int `json:"aa"`
+	}{}
+	json.NewDecoder(r.Body).Decode(&tmp)
+
+	EditorChannel <- func() {
+		renderer.Settings.SetAntialising(renderer.Antialiasing(tmp.AA))
+	}
+	w.WriteHeader(http.StatusOK)
+}
+func rendererApply(w http.ResponseWriter, r *http.Request) {
+	EditorChannel <- func() {
+		renderer.Settings.Apply()
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func Start() {
 	router := mux.NewRouter()
 
@@ -146,6 +173,11 @@ func Start() {
 	texture.HandleFunc("/resolution", textureGetResolution).Methods("GET")
 	texture.HandleFunc("/resolution", textureSetResolution).Methods("POST")
 	texture.HandleFunc("/apply", textureApply).Methods("GET")
+
+	renderer := router.PathPrefix("/renderer").Subrouter()
+	renderer.HandleFunc("/aa", rendererGetAA).Methods("GET")
+	renderer.HandleFunc("/aa", rendererSetAA).Methods("POST")
+	renderer.HandleFunc("/apply", rendererApply).Methods("GET")
 
 	corsObj := handlers.AllowedOrigins([]string{"*"})
 

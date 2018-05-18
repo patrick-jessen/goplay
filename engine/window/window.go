@@ -89,6 +89,10 @@ func Update() {
 
 // resizeCallback handles window resize.
 func resizeCallback(w *glfw.Window, width, height int) {
+	if width == 0 || height == 0 {
+		// Happens when fullscreen window loses focus.
+		return
+	}
 	for _, r := range resizeHandlers {
 		r(width, height)
 	}

@@ -8,24 +8,11 @@ import (
 )
 
 type forwardRenderer struct {
-	scene scene.Scene
-
 	shaderFrameBuffer *framebuffer.FrameBuffer
 	width, height     int
 }
 
-func NewForward() *forwardRenderer {
-	return &forwardRenderer{}
-}
-
-func (f *forwardRenderer) Initialize(s scene.Scene) {
-	f.scene = s
-
-	// Locate all lights
-
-	// Subscribe to AddNode()
-	// so that future ligts can be captured
-
+func (f *forwardRenderer) initialize() {
 	f.width, f.height = window.Settings.Size()
 
 	var msLevel int
@@ -45,7 +32,11 @@ func (f *forwardRenderer) Initialize(s scene.Scene) {
 	f.shaderFrameBuffer = framebuffer.New(f.width, f.height, 1, msLevel)
 }
 
-func (f *forwardRenderer) Render() {
+func (f *forwardRenderer) deinitialize() {
+	f.shaderFrameBuffer.Free()
+}
+
+func (f *forwardRenderer) render(scene scene.Scene) {
 
 	// Shadow map pass
 	f.renderShadows()
@@ -53,18 +44,22 @@ func (f *forwardRenderer) Render() {
 	// Shading pass
 	f.shaderFrameBuffer.Bind()
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	f.scene.Render()
+	scene.Render()
 
 	// Postprocessing pass
 	switch Settings.curAA {
-	case NoAA: // TODO
-	case FXAA: // TODO
-		// Draw quad
+	case FXAA:
+		framebuffer.Unbind()
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		// TODO: Draw quad
 	default:
+		// 1. NoAA blits onto default frame buffer 1:1.
+		// 2. MSAAx_ blits onto default frame buffer and
+		// performs linear interpolation on samples.
 		f.shaderFrameBuffer.Blit(nil, f.width, f.height, false)
 	}
 }
 
 func (f *forwardRenderer) renderShadows() {
-
+	// TODO
 }
