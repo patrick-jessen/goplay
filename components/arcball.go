@@ -58,10 +58,10 @@ func (c *ArcBall) Update() {
 	c.RotX += c.rotXVelocity
 	c.RotY += c.rotYVelocity
 
-	if c.RotX >= math.Pi/2 {
-		c.RotX = math.Pi/2 - 0.01
-	} else if c.RotX <= -math.Pi/2 {
-		c.RotX = -math.Pi/2 + 0.01
+	if c.RotX > math.Pi/2-0.001 {
+		c.RotX = math.Pi/2 - 0.001
+	} else if c.RotX < -math.Pi/2+0.001 {
+		c.RotX = -math.Pi/2 + 0.001
 	}
 
 	// Handle zoom

@@ -29,14 +29,14 @@ func New(width int, height int, numCols int, msLevel int) *FrameBuffer {
 		gl.GenTextures(1, &colors[i])
 		if msLevel == 0 {
 			gl.BindTexture(gl.TEXTURE_2D, colors[i])
-			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
+			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 			gl.BindTexture(gl.TEXTURE_2D, 0)
 			gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+i, gl.TEXTURE_2D, colors[i], 0)
 		} else {
 			gl.BindTexture(gl.TEXTURE_2D_MULTISAMPLE, colors[i])
-			gl.TexImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, int32(msLevel), gl.RGBA, w, h, true)
+			gl.TexImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, int32(msLevel), gl.RGBA32F, w, h, true)
 			gl.BindTexture(gl.TEXTURE_2D_MULTISAMPLE, 0)
 			gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+i, gl.TEXTURE_2D_MULTISAMPLE, colors[i], 0)
 		}
