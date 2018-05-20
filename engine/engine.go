@@ -5,6 +5,7 @@ package engine
 import (
 	"github.com/patrick-jessen/goplay/editor"
 	"github.com/patrick-jessen/goplay/engine/renderer"
+	"github.com/patrick-jessen/goplay/engine/scene"
 	"github.com/patrick-jessen/goplay/engine/window"
 	"github.com/patrick-jessen/goplay/engine/worker"
 )
@@ -32,6 +33,9 @@ func Start(a Application) {
 	for !window.ShouldClose() {
 		window.Update()
 		a.OnUpdate()
+
+		scene.Current().Update()
+		renderer.Render()
 
 		select {
 		case ef := <-editor.EditorChannel:

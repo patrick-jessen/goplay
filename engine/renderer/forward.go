@@ -3,22 +3,43 @@ package renderer
 import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/patrick-jessen/goplay/engine/framebuffer"
+	"github.com/patrick-jessen/goplay/engine/model"
 	"github.com/patrick-jessen/goplay/engine/scene"
+	"github.com/patrick-jessen/goplay/engine/shader"
 	"github.com/patrick-jessen/goplay/engine/window"
 )
+
+type quadMat struct {
+	Shader shader.Shader
+}
+
+func (m quadMat) Apply() {
+	m.Shader.Use()
+}
 
 type forwardRenderer struct {
 	shaderFrameBuffer *framebuffer.FrameBuffer
 	width, height     int
+	postScene         scene.Scene
 }
 
 func (f *forwardRenderer) initialize() {
+	f.postScene = scene.New()
+
 	f.width, f.height = window.Settings.Size()
 
 	var msLevel int
 	switch Settings.curAA {
 	case NoAA:
 	case FXAA:
+		model.Load("quad").Mount(f.postScene.Root)
+		s := shader.Load("fxaa")
+		uRes := s.GetUniform("resolution")
+		gl.Uniform2f(uRes, float32(f.width), float32(f.height))
+
+		f.postScene.Root.Child("0").Component("MeshRenderer").(*model.MeshRenderer).Mat = &quadMat{
+			Shader: s,
+		}
 	case MSAAx2:
 		msLevel = 2
 	case MSAAx4:
@@ -51,7 +72,9 @@ func (f *forwardRenderer) render(scene scene.Scene) {
 	case FXAA:
 		framebuffer.Unbind()
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		// TODO: Draw quad
+
+		f.shaderFrameBuffer.BindColorTexture(0, 0)
+		f.postScene.Render()
 	default:
 		// 1. NoAA blits onto default frame buffer 1:1.
 		// 2. MSAAx_ blits onto default frame buffer and

@@ -114,6 +114,6 @@ func Initialize() {
 func Deinitialize() {
 	rendererInst.deinitialize()
 }
-func Render(s scene.Scene) {
-	rendererInst.render(s)
+func Render() {
+	rendererInst.render(scene.Current())
 }
