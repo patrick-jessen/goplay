@@ -47,14 +47,12 @@ func Create() {
 		log.Panic("failed to initialize OpenGL", "error", err)
 	}
 
-	Settings.Apply()
-
-	w, h := Settings.Size()
-	gl.Viewport(0, 0, int32(w), int32(h))
 	gl.Enable(gl.CULL_FACE)
 	gl.Enable(gl.FRAMEBUFFER_SRGB)
 	gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.MULTISAMPLE)
+
+	Settings.Apply()
 }
 
 // Destroy closes the window.

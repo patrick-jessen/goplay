@@ -57,7 +57,7 @@ func (f *forwardRenderer) deinitialize() {
 	f.shaderFrameBuffer.Free()
 }
 
-func (f *forwardRenderer) render(scene scene.Scene) {
+func (f *forwardRenderer) render(scene *scene.Scene) {
 
 	// Shadow map pass
 	f.renderShadows()

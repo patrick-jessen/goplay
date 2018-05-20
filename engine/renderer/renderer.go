@@ -10,7 +10,7 @@ import (
 type renderer interface {
 	initialize()
 	deinitialize()
-	render(scene.Scene)
+	render(*scene.Scene)
 }
 
 var rendererInst renderer

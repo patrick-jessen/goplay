@@ -16,6 +16,7 @@ type Node struct {
 	components map[string]Component
 
 	parent         *Node
+	scene          *Scene
 	name           string
 	worldTransform mgl.Mat4
 }
@@ -32,12 +33,13 @@ func newNode() *Node {
 }
 
 // initialize is called whenever a node is attached to a (new) parent.
-func (n *Node) initialize(parent *Node, name string) {
+func (n *Node) initialize(scene *Scene, parent *Node, name string) {
+	n.scene = scene
 	n.parent = parent
 	n.name = name
 
 	for k, v := range n.children {
-		v.initialize(n, k)
+		v.initialize(scene, n, k)
 	}
 	for _, v := range n.components {
 		v.Initialize(n)
@@ -52,7 +54,7 @@ func (n *Node) NewChild(name string) *Node {
 	}
 
 	child := newNode()
-	child.initialize(n, name)
+	child.initialize(n.scene, n, name)
 	n.children[name] = child
 	return child
 }

@@ -11,6 +11,10 @@ import (
 	"github.com/patrick-jessen/goplay/engine/window"
 )
 
+func init() {
+	scene.RegisterComponent(&ArcBall{})
+}
+
 type ArcBall struct {
 	RotX float32
 	RotY float32
