@@ -3,22 +3,18 @@
 package engine
 
 import (
+	// Include components
+	_ "github.com/patrick-jessen/goplay/components"
 	"github.com/patrick-jessen/goplay/editor"
 	"github.com/patrick-jessen/goplay/engine/renderer"
+	"github.com/patrick-jessen/goplay/engine/resource"
 	"github.com/patrick-jessen/goplay/engine/scene"
 	"github.com/patrick-jessen/goplay/engine/window"
 	"github.com/patrick-jessen/goplay/engine/worker"
 )
 
-// Application is the base of the application.
-type Application interface {
-	OnStart()
-	OnUpdate()
-	OnExit()
-}
-
 // Start starts the engine using the given application.
-func Start(a Application) {
+func Start() {
 	go editor.Start()
 
 	window.Create()
@@ -27,21 +23,18 @@ func Start(a Application) {
 	renderer.Initialize()
 	defer renderer.Deinitialize()
 
-	a.OnStart()
-	defer a.OnExit()
+	resource.LoadScene("main").MakeCurrent()
 
 	for !window.ShouldClose() {
 		window.Update()
-		a.OnUpdate()
-
 		scene.Current().Update()
 		renderer.Render()
 
 		select {
-		case ef := <-editor.EditorChannel:
+		case ef := <-editor.Channel:
 			ef()
-		case wf := <-worker.Channel:
-			wf()
+		case work := <-worker.Channel:
+			work()
 		default:
 		}
 	}

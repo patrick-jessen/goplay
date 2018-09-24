@@ -7,10 +7,11 @@ import (
 	_ "image/png"  // Support PNG format
 	"os"
 
+	"github.com/patrick-jessen/goplay/engine/worker"
+
 	"github.com/nfnt/resize"
 
 	"github.com/patrick-jessen/goplay/engine/log"
-	"github.com/patrick-jessen/goplay/engine/worker"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
 )

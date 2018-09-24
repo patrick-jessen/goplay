@@ -13,7 +13,7 @@ import (
 	"github.com/patrick-jessen/goplay/engine/window"
 )
 
-var EditorChannel = make(chan func(), 10)
+var Channel = make(chan func(), 10)
 
 func windowSetVsync(w http.ResponseWriter, r *http.Request) {
 	tmp := struct {
@@ -21,7 +21,7 @@ func windowSetVsync(w http.ResponseWriter, r *http.Request) {
 	}{}
 	json.NewDecoder(r.Body).Decode(&tmp)
 
-	EditorChannel <- func() {
+	Channel <- func() {
 		window.Settings.SetVSync(tmp.Vsync)
 	}
 	w.WriteHeader(http.StatusOK)
@@ -47,7 +47,7 @@ func windowSetFullScreen(w http.ResponseWriter, r *http.Request) {
 	}{}
 	json.NewDecoder(r.Body).Decode(&tmp)
 
-	EditorChannel <- func() {
+	Channel <- func() {
 		window.Settings.SetFullScreen(tmp.FullScreen)
 	}
 	w.WriteHeader(http.StatusOK)
@@ -69,14 +69,14 @@ func windowSetSize(w http.ResponseWriter, r *http.Request) {
 	}{}
 	json.NewDecoder(r.Body).Decode(&tmp)
 
-	EditorChannel <- func() {
+	Channel <- func() {
 		window.Settings.SetSize(tmp.Width, tmp.Height)
 	}
 	w.WriteHeader(http.StatusOK)
 }
 
 func windowApply(w http.ResponseWriter, r *http.Request) {
-	EditorChannel <- func() {
+	Channel <- func() {
 		window.Settings.Apply()
 	}
 	w.WriteHeader(http.StatusOK)
@@ -99,7 +99,7 @@ func textureSetFilter(w http.ResponseWriter, r *http.Request) {
 	}{}
 	json.NewDecoder(r.Body).Decode(&tmp)
 
-	EditorChannel <- func() {
+	Channel <- func() {
 		texture.Settings.SetFilter(texture.Filter(tmp.Filter), tmp.Aniso)
 	}
 	w.WriteHeader(http.StatusOK)
@@ -118,13 +118,13 @@ func textureSetResolution(w http.ResponseWriter, r *http.Request) {
 	}{}
 	json.NewDecoder(r.Body).Decode(&tmp)
 
-	EditorChannel <- func() {
+	Channel <- func() {
 		texture.Settings.SetResolution(uint(tmp.Res))
 	}
 	w.WriteHeader(http.StatusOK)
 }
 func textureApply(w http.ResponseWriter, r *http.Request) {
-	EditorChannel <- func() {
+	Channel <- func() {
 		texture.Settings.Apply()
 	}
 	w.WriteHeader(http.StatusOK)
@@ -143,13 +143,13 @@ func rendererSetAA(w http.ResponseWriter, r *http.Request) {
 	}{}
 	json.NewDecoder(r.Body).Decode(&tmp)
 
-	EditorChannel <- func() {
+	Channel <- func() {
 		renderer.Settings.SetAntialising(renderer.Antialiasing(tmp.AA))
 	}
 	w.WriteHeader(http.StatusOK)
 }
 func rendererApply(w http.ResponseWriter, r *http.Request) {
-	EditorChannel <- func() {
+	Channel <- func() {
 		renderer.Settings.Apply()
 	}
 	w.WriteHeader(http.StatusOK)
